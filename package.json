@@ -1,0 +1,31 @@
+{
+  "name": "split_bill",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hiby90hou/split_bill_server.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hiby90hou/split_bill_server/issues"
+  },
+  "homepage": "https://github.com/hiby90hou/split_bill_server#readme",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "cors": "^2.8.4",
+    "ejs": "^2.5.7",
+    "express": "^4.16.2",
+    "paypal-rest-sdk": "^1.8.1",
+    "stripe": "^5.5.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.15.1"
+  }
+}
