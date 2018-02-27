@@ -1,14 +1,24 @@
 const express = require("express");
 const cors = require('cors')
 const ejs = require('ejs')
+const url = require('url')
 const paypal = require('paypal-rest-sdk')
-
+const PORT = process.env.PORT || 3000
 
 const app = express();
 const client_id = process.env.PAYPAL_CLIENT_ID
 const client_secret = process.env.PAYPAL_CLIENT_SECRET
-// console.log(client_id)
-// console.log(client_secret)
+
+// const bodyParser = require('body-parser')
+
+// app.use(bodyParser.json());       // to support JSON-encoded bodies
+// app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+//  extended: true
+// }));
+app.use(express.json());       // to support JSON-encoded bodies
+app.use(express.urlencoded({     // to support URL-encoded bodies
+ extended: true
+})); // to support URL-encoded bodies
 
 paypal.configure({
   'mode': 'sandbox', //sandbox or live
@@ -18,33 +28,58 @@ paypal.configure({
 
 app.use(cors())
 
+app.set('views', './views')
 app.set('view engine','ejs')
 
-app.get('/', (req, res) => res.render('index'))
+app.get('/', (req, res) => 
+  {
+    const par = url.parse(req.url, true).query;
+    console.log(par)
+    const name = par.name || "default"
+    const price = par.price || 0
+    const quantity = par.quantity || 0
+
+    res.render('index', {
+    name: name,
+    price: price,
+    quantity: quantity
+    })
+  }
+)
 
 app.post('/pay', (req, res) => {
+
+  const name = req.body.name
+  const price =  parseFloat(req.body.price)
+  const quantity =  parseFloat(req.body.quantity)
+  const total = 1.0 * price * quantity
+
+  console.log("name:")
+  // console.log(req.body)
+  console.log(total)
+
 	var create_payment_json = {
     "intent": "sale",
     "payer": {
         "payment_method": "paypal"
     },
     "redirect_urls": {
-        "return_url": "http://localhost:3000/success",
+        "return_url": "http://localhost:3000/success/?total="+total,
         "cancel_url": "http://localhost:3000/cancel"
     },
     "transactions": [{
       "item_list": {
           "items": [{
-              "name": "AAA",
+              "name": name,
               "sku": "001",
-              "price": "10.00",
+              "price": price,
               "currency": "AUD",
-              "quantity": 1
+              "quantity": quantity
           }]
       },
       "amount": {
           "currency": "AUD",
-          "total": "10.00"
+          "total": total
       },
       "description": "This is the payment description."
     }]
@@ -69,13 +104,14 @@ app.post('/pay', (req, res) => {
 app.get('/success', (req,res) => {
 	const payerId = req.query.PayerID
 	const paymentId = req.query.paymentId
+  const total = req.query.total
 
 	const execute_payment_json = {
     "payer_id" : payerId,
     "transactions": [{
     	"amount":{
     		"currency": "AUD",
-    		"total": "10.00"
+    		"total": total
     	}
     }]
   };
@@ -101,4 +137,4 @@ app.get('/success', (req,res) => {
 
 app.get('/cancel', (req, res) => res.send('Cancelled'))
 
-app.listen(3000, () => console.log('Server started'))
+app.listen(PORT, () => console.log('Server started'))

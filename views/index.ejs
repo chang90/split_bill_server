@@ -5,9 +5,12 @@
 	<title>Paypal Node App</title>
 </head>
 <body>
-	<h1>BBB</h1>
-	<h2>Buy for $25</h2>
-	<form action="/pay" method="post">
+	<h1><%=price%></h1>
+	<h2><%=quantity%></h2>
+	<form action="/pay" method="post" class="pay-form">
+		<input type="hidden" value=<%=price%> name="price">	
+		<input type="hidden" value=<%=name%> name="name">	
+		<input type="hidden" value=<%=quantity%> name="quantity">	
 		<input type="submit" value='Buy'>		
 	</form>
 </body>
