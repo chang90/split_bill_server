@@ -128,7 +128,8 @@ app.get('/success', (req,res) => {
       // otherwise
       //   res.redirect('error').end();
        
-      res.send('Payment Success - Thank you').end();
+      res.send('Payment Success - Thank you');
+      // res.render('success')
     }
   });
 
