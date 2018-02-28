@@ -115,7 +115,8 @@ app.get('/success', (req,res) => {
 	paypal.payment.execute(paymentId, execute_payment_json, function (error, payment) {
     if (error) {
       console.log(error.response);
-      res.redirect('error').end();
+      // res.redirect('error').end();
+      res.send('Payment Error');
     } else {
       console.log("Get Payment Response");
       // console.log(payment.payer);
@@ -128,8 +129,8 @@ app.get('/success', (req,res) => {
       // otherwise
       //   res.redirect('error').end();
        
-      res.send('Payment Success - Thank you');
-      // res.render('success')
+      // res.send('Payment Success - Thank you');
+      res.render('success');
     }
   });
 
