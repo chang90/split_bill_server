@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/hiby90hou/split_bill_server#readme",
   "dependencies": {
+    "babel-polyfill": "^6.26.0",
     "body-parser": "^1.18.2",
     "cors": "^2.8.4",
     "ejs": "^2.5.7",

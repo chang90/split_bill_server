@@ -186,8 +186,9 @@ app.post('/api/new_bill',(req, res) =>{
   db.one("INSERT INTO orders(email,restaurant,people_num,total_price) VALUES($1, $2, $3, $4) RETURNING id;", [email,restaurant,people_num,total_price])
     .then((data) => {
       // success;
-      const id = ""+(data.id);
-      res.send(id)
+      // const id = ""+(data.id);
+      // res.send(id)
+      res.send(data)
     })
     .catch(error => {
       // error;
