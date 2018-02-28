@@ -3,7 +3,6 @@ const cors = require('cors')
 const ejs = require('ejs')
 const url = require('url')
 const paypal = require('paypal-rest-sdk')
-const pgp = require('pg-promise')
 const PORT = process.env.PORT || 3000
 
 const app = express();
@@ -47,7 +46,7 @@ app.post('/pay', (req, res) => {
   const name = req.body.name
   const price =  parseFloat(req.body.price)
   const quantity =  parseFloat(req.body.quantity)
-  const total = 1.0 * price * quantity
+  const total = (1.0 * price * quantity).toFixed(2)
 
   console.log("name:")
   // console.log(req.body)
@@ -59,8 +58,8 @@ app.post('/pay', (req, res) => {
         "payment_method": "paypal"
     },
     "redirect_urls": {
-        "return_url": "http://localhost:3000/success/?total="+total,
-        "cancel_url": "http://localhost:3000/cancel"
+        "return_url": "https://serene-shore-75692.herokuapp.com/success/?total="+total,
+        "cancel_url": "https://serene-shore-75692.herokuapp.com/cancel"
     },
     "transactions": [{
       "item_list": {
