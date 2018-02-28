@@ -16,7 +16,7 @@ CREATE TABLE sharer (
   ID SERIAL PRIMARY KEY,
   order_id INTEGER NOT NULL,
   email VARCHAR NOT NULL,
-  is_paid Boolean,
+  is_paid Boolean DEFAULT FALSE,
   FOREIGN KEY (order_id) REFERENCES orders(id)
    ON DELETE CASCADE
 );

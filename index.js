@@ -8,11 +8,25 @@ const PORT = process.env.PORT || 3000
 const app = express();
 const client_id = process.env.PAYPAL_CLIENT_ID
 const client_secret = process.env.PAYPAL_CLIENT_SECRET
+const pgp = require('pg-promise')();
 
 app.use(express.json());       // to support JSON-encoded bodies
 app.use(express.urlencoded({     // to support URL-encoded bodies
  extended: true
 })); // to support URL-encoded bodies
+
+// const showUser = function(){
+const cn ={
+  url:'http://localhost:5432',
+  database: 'splitbill',
+  username: 'darkend',
+  password: 'hiby90hou'
+}
+
+const db = pgp(process.env.DATABASE_URL || cn);
+
+
+// }
 
 paypal.configure({
   'mode': 'sandbox', //sandbox or live
@@ -44,7 +58,7 @@ app.get('/', (req, res) =>
 )
 
 app.post('/pay', (req, res) => {
-
+  console.log(req.body)
   const name = req.body.name
   const price =  parseFloat(req.body.price)
   const quantity =  parseFloat(req.body.quantity)
@@ -138,6 +152,47 @@ app.get('/success', (req,res) => {
 
 app.get('/cancel', (req, res) => res.send('Cancelled'))
 
+app.get('/api/check',(req, res) =>{
+  // db.any(`SELECT * FROM orders WHERE id=1`)
+  db.any(`SELECT (sharer.email) FROM orders INNER JOIN sharer 
+  ON sharer.order_id = orders.id
+  WHERE orders.id=1`)
+  .then(info =>{
+  console.log(info.map(elem => elem.email))
+  res.send(info.map(elem => elem.email))
+    });
+  })
 
+app.get('/api/add',(req, res) =>{
+  db.one("INSERT INTO sharer(order_id,email) VALUES(1, 'test2@test.co') RETURNING order_id;")
+    .then((data) => {
+      // success;
+      console.log(data);
+      res.send(data)
+    })
+    .catch(error => {
+      // error;
+      res.send('error'+ error)
+    });
+  })
+
+app.post('/api/new_bill',(req, res) =>{
+  console.log(req.body)
+  const email = req.body.email
+  const restaurant = req.body.restaurant
+  const people_num = req.body.people_num
+  const total_price = req.body.total_price
+
+  db.one("INSERT INTO orders(email,restaurant,people_num,total_price) VALUES($1, $2, $3, $4) RETURNING id;", [email,restaurant,people_num,total_price])
+    .then((data) => {
+      // success;
+      const id = ""+(data.id);
+      res.send(id)
+    })
+    .catch(error => {
+      // error;
+      res.send('error:'+ error)
+    });
+  })
 
 app.listen(PORT, () => console.log('Server started'))
