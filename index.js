@@ -3,18 +3,13 @@ const cors = require('cors')
 const ejs = require('ejs')
 const url = require('url')
 const paypal = require('paypal-rest-sdk')
+const pgp = require('pg-promise')
 const PORT = process.env.PORT || 3000
 
 const app = express();
 const client_id = process.env.PAYPAL_CLIENT_ID
 const client_secret = process.env.PAYPAL_CLIENT_SECRET
 
-// const bodyParser = require('body-parser')
-
-// app.use(bodyParser.json());       // to support JSON-encoded bodies
-// app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
-//  extended: true
-// }));
 app.use(express.json());       // to support JSON-encoded bodies
 app.use(express.urlencoded({     // to support URL-encoded bodies
  extended: true
@@ -121,8 +116,11 @@ app.get('/success', (req,res) => {
       console.log(error.response);
       res.redirect('error').end();
     } else {
-      // console.log("Get Payment Response");
-      console.log(JSON.stringify(payment));
+      console.log("Get Payment Response");
+      // console.log(payment.payer);
+      const userEmail = payment.payer.payer_info.email
+
+      console.log("userEmail:" + userEmail)
       // if payment state is approved
       //   update the payment DB
       //   res.render('payment-thankyou');
@@ -136,5 +134,7 @@ app.get('/success', (req,res) => {
 })
 
 app.get('/cancel', (req, res) => res.send('Cancelled'))
+
+
 
 app.listen(PORT, () => console.log('Server started'))

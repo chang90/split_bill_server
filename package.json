@@ -23,6 +23,8 @@
     "ejs": "^2.5.7",
     "express": "^4.16.2",
     "paypal-rest-sdk": "^1.8.1",
+    "pg": "^7.4.1",
+    "pg-promise": "^8.1.0",
     "stripe": "^5.5.0"
   },
   "devDependencies": {

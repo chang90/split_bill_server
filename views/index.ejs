@@ -2,11 +2,9 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Paypal Node App</title>
+	<title>Paypal payment</title>
 </head>
 <body>
-	<h1><%=price%></h1>
-	<h2><%=quantity%></h2>
 	<form action="/pay" method="post" class="pay-form">
 		<input type="hidden" value=<%=price%> name="price">	
 		<input type="hidden" value=<%=name%> name="name">	
