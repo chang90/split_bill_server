@@ -25,6 +25,8 @@ app.use(cors())
 app.set('views', './views')
 app.set('view engine','ejs')
 
+app.use(express.static(__dirname + '/public'));
+
 app.get('/', (req, res) => 
   {
     const par = url.parse(req.url, true).query;
@@ -126,7 +128,7 @@ app.get('/success', (req,res) => {
       // otherwise
       //   res.redirect('error').end();
        
-      res.send('Success').end();
+      res.send('Payment Success - Thank you').end();
     }
   });
 

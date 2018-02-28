@@ -3,13 +3,16 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Paypal payment</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="/style.css" rel="stylesheet" type="text/css">
 </head>
 <body>
+	<p>You will pay <%=price%> for the event in <%=name%></p>
 	<form action="/pay" method="post" class="pay-form">
 		<input type="hidden" value=<%=price%> name="price">	
 		<input type="hidden" value=<%=name%> name="name">	
 		<input type="hidden" value=<%=quantity%> name="quantity">	
-		<input type="submit" value='Buy'>		
+		<input type="submit" value='PAY' id="pay">		
 	</form>
 </body>
 </html>
