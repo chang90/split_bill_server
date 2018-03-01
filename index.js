@@ -48,11 +48,13 @@ app.get('/', (req, res) =>
     const name = par.name || "default"
     const price = par.price || 0
     const quantity = par.quantity || 0
+    const order_id = par.order_id || 0
 
     res.render('index', {
     name: name,
     price: price,
-    quantity: quantity
+    quantity: quantity,
+    order_id: order_id
     })
   }
 )
@@ -60,6 +62,7 @@ app.get('/', (req, res) =>
 app.post('/pay', (req, res) => {
   console.log(req.body)
   const name = req.body.name
+  const order_id = req.body.order_id
   const price =  parseFloat(req.body.price)
   const quantity =  parseFloat(req.body.quantity)
   const total = (1.0 * price * quantity).toFixed(2)
@@ -74,8 +77,8 @@ app.post('/pay', (req, res) => {
         "payment_method": "paypal"
     },
     "redirect_urls": {
-        "return_url": "https://serene-shore-75692.herokuapp.com/success/?total="+total,
-        "cancel_url": "https://serene-shore-75692.herokuapp.com/cancel"
+        "return_url": "http://localhost:3000/success/?total="+total+"&order_id="+order_id,
+        "cancel_url": "http://localhost:3000/cancel"
     },
     "transactions": [{
       "item_list": {
@@ -115,6 +118,7 @@ app.get('/success', (req,res) => {
 	const payerId = req.query.PayerID
 	const paymentId = req.query.paymentId
   const total = req.query.total
+  const order_id = req.query.order_id
 
 	const execute_payment_json = {
     "payer_id" : payerId,
@@ -134,17 +138,24 @@ app.get('/success', (req,res) => {
     } else {
       console.log("Get Payment Response");
       // console.log(payment.payer);
-      const userEmail = payment.payer.payer_info.email
-
-      console.log("userEmail:" + userEmail)
+      const payerEmail = payment.payer.payer_info.email
       // if payment state is approved
-      //   update the payment DB
-      //   res.render('payment-thankyou');
-      // otherwise
-      //   res.redirect('error').end();
+      //   update the DB
+
+      db.one("INSERT INTO sharer(order_id,email) VALUES($1, $2) RETURNING id;", [order_id,payerEmail])
+        .then((data) => {
+          // success;
+          // const id = ""+(data.id);
+          // res.json(data)
+          res.render('success');
+        })
+        .catch(error => {
+          // error;
+          res.send('error:'+ error)
+        });
        
       // res.send('Payment Success - Thank you');
-      res.render('success');
+      // res.render('success');
     }
   });
 
@@ -152,29 +163,31 @@ app.get('/success', (req,res) => {
 
 app.get('/cancel', (req, res) => res.send('Cancelled'))
 
+// check who paid in this order
 app.get('/api/check',(req, res) =>{
+  const order_id = req.query.order_id
   // db.any(`SELECT * FROM orders WHERE id=1`)
   db.any(`SELECT (sharer.email) FROM orders INNER JOIN sharer 
   ON sharer.order_id = orders.id
-  WHERE orders.id=1`)
+  WHERE orders.id=$1`,[order_id])
   .then(info =>{
-  console.log(info.map(elem => elem.email))
+  // console.log(info.map(elem => elem.email))
   res.send(info.map(elem => elem.email))
     });
   })
 
-app.get('/api/add',(req, res) =>{
-  db.one("INSERT INTO sharer(order_id,email) VALUES(1, 'test2@test.co') RETURNING order_id;")
-    .then((data) => {
-      // success;
-      console.log(data);
-      res.send(data)
-    })
-    .catch(error => {
-      // error;
-      res.send('error'+ error)
-    });
-  })
+// app.get('/api/add',(req, res) =>{
+//   db.one("INSERT INTO sharer(order_id,email) VALUES(1, 'test2@test.co') RETURNING order_id;")
+//     .then((data) => {
+//       // success;
+//       console.log(data);
+//       res.send(data)
+//     })
+//     .catch(error => {
+//       // error;
+//       res.send('error'+ error)
+//     });
+//   })
 
 app.post('/api/new_bill',(req, res) =>{
   console.log(req.body)
@@ -188,12 +201,30 @@ app.post('/api/new_bill',(req, res) =>{
       // success;
       // const id = ""+(data.id);
       // res.send(id)
-      res.send(data)
+      res.json(data)
     })
     .catch(error => {
       // error;
       res.send('error:'+ error)
     });
-  })
+})
+
+app.post('/api/new_payment',(req, res) =>{
+  console.log(req.body)
+  const order_id = req.body.order_id
+  const email = req.body.email
+
+  db.one("INSERT INTO sharer(order_id,email) VALUES($1, $2) RETURNING id;", [order_id,email])
+    .then((data) => {
+      // success;
+      // const id = ""+(data.id);
+      // res.send(id)
+      res.json(data)
+    })
+    .catch(error => {
+      // error;
+      res.send('error:'+ error)
+    });
+})
 
 app.listen(PORT, () => console.log('Server started'))

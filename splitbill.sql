@@ -1,7 +1,7 @@
-DROP DATABASE IF EXISTS splitbill;
-CREATE DATABASE splitbill;
+-- DROP DATABASE IF EXISTS splitbill;
+-- CREATE DATABASE splitbill;
 
-\c splitbill;
+-- \c splitbill;
 
 CREATE TABLE orders (
   ID SERIAL PRIMARY KEY,
