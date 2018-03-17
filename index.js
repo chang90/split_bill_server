@@ -3,6 +3,10 @@ const cors = require('cors')
 const ejs = require('ejs')
 const url = require('url')
 const paypal = require('paypal-rest-sdk')
+const session = require('express-session');
+const cookieParser = require('cookie-parser');
+const MemoryStore = require('session-memory-store')(session);
+
 const PORT = process.env.PORT || 3000
 
 const app = express();
@@ -14,6 +18,20 @@ app.use(express.json());       // to support JSON-encoded bodies
 app.use(express.urlencoded({     // to support URL-encoded bodies
  extended: true
 })); // to support URL-encoded bodies
+
+
+
+// configure sessions
+app.use(cookieParser());
+app.use(session({
+  name: 'session name',
+  secret: 'any secret will do',
+  store: new MemoryStore(),
+  proxy: true,
+  resave: false,
+  saveUninitialized: true,
+}));
+
 
 // const showUser = function(){
 const cn ={
@@ -41,7 +59,9 @@ app.set('view engine','ejs')
 
 app.use(express.static(__dirname + '/public'));
 
-app.get('/', (req, res) => 
+
+
+app.get('/', (req, res) =>
   {
     const par = url.parse(req.url, true).query;
     console.log(par)
@@ -58,6 +78,25 @@ app.get('/', (req, res) =>
     })
   }
 )
+
+app.get('/session', (req, res) => {
+  res.send({
+    session: req.session || null,
+  });
+});
+
+app.get('/setmyname', (req, res) => {
+  req.session.myName = 'mark';
+  res.send({success: true});
+});
+
+app.get('/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.send({ destroyed: true });
+  });
+})
+
+
 
 app.post('/pay', (req, res) => {
   console.log(req.body)
@@ -153,7 +192,7 @@ app.get('/success', (req,res) => {
           // error;
           res.send('error:'+ error)
         });
-       
+
       // res.send('Payment Success - Thank you');
       // res.render('success');
     }
@@ -167,7 +206,7 @@ app.get('/cancel', (req, res) => res.send('Cancelled'))
 app.get('/api/check',(req, res) =>{
   const order_id = req.query.order_id
   // db.any(`SELECT * FROM orders WHERE id=1`)
-  db.any(`SELECT (sharer.email) FROM orders INNER JOIN sharer 
+  db.any(`SELECT (sharer.email) FROM orders INNER JOIN sharer
   ON sharer.order_id = orders.id
   WHERE orders.id=$1`,[order_id])
   .then(info =>{
