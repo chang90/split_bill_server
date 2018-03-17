@@ -5,7 +5,7 @@ const url = require('url')
 const paypal = require('paypal-rest-sdk')
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
-const MemoryStore = require('session-memory-store')(session);
+const SessionStore = require('connect-pg-simple')(session);
 
 const PORT = process.env.PORT || 3000
 
@@ -21,18 +21,6 @@ app.use(express.urlencoded({     // to support URL-encoded bodies
 
 
 
-// configure sessions
-app.use(cookieParser());
-app.use(session({
-  name: 'session name',
-  secret: 'any secret will do',
-  store: new MemoryStore(),
-  proxy: true,
-  resave: false,
-  saveUninitialized: true,
-}));
-
-
 // const showUser = function(){
 const cn ={
   url:'http://localhost:5432',
@@ -44,7 +32,20 @@ const cn ={
 const db = pgp(process.env.DATABASE_URL || cn);
 
 
-// }
+// configure sessions
+app.use(cookieParser());
+app.use(session({
+  name: 'session name',
+  secret: 'any secret will do',
+  store: new SessionStore({
+    conObject: cn,
+  }),
+  proxy: true,
+  resave: false,
+  saveUninitialized: true,
+}));
+
+
 
 paypal.configure({
   'mode': 'sandbox', //sandbox or live
